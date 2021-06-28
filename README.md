@@ -18,3 +18,23 @@ start the docker container: <br/>
 start an interactive shell:<br/>
 ```docker exec -it batsim_docker /bin/bash```
 
+## How to run some simulations
+
+1.  Start the docker container: `docker start batsim_docker`
+2.  Start an interactive shell: `docker exec -it batsim_docker /bin/bash`
+3.  Change directory to "basefiles": `cd /home/sim/basefiles`
+4.  Choose a config file and optionally edit it (*below): `nano ./configs/1_simulation.config`
+5.  Set the config file you wish to run:`file1=./configs/1_simulation.config`
+6.  Set the output folder you wish the output to go to ( a new folder ): `folder1=/home/sim/experiments/1_sim`
+5.  Run the simulation: `python3 run_simulation.py --config $file1 --output $folder1`
+
+\* Instructions for editing config files can be seen by running the following commands:
+ - view general info on config files: `python3 generate_config.py  --config-info general`
+ - view general info on sweeps: `python3 generate_config.py --config-info sweeps`
+ - All --config-info options can be seen by running: `python3 generate_config.py --help`
+    - Under `Required Options 1 -> --config-info <type>` you can see the various types of info that is offered
+    - generate_config.py will not generate your config file for you.  It is called that because it takes a config file that you will need to write and generates the underlying config files the simulator needs.
+
+  ### For example:
+    #### Run a modified Figure 4, left-hand subfigure for workload 4:
+        
