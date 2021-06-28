@@ -76,7 +76,7 @@ MTBF = df["MTBF"].iloc[0] if not df["MTBF"].isnull().iloc[0] else -1
 SMTBF = df["SMTBF"].iloc[0] if not df["SMTBF"].isnull().iloc[0] else -1
 error = df["Tc_Error"].iloc[0]
 
-#round all times
+
 df["submission_time"]=df["submission_time"].astype(np.double)
 df["starting_time"]=df["starting_time"].astype(np.double)
 df["execution_time"]=df["execution_time"].astype(np.double)
@@ -234,17 +234,21 @@ if raw==2 or raw==3:
 #df3 becomes everything df2 was without the resubmitted jobs
 df3=df2[df2.resubmit==0]
 
+
 #reorder columns
 if checkpointing:
     cols = ['job_id','workload_name','workload_num_machines','profile','submission_time','requested_number_of_resources',\
             'requested_time','success','real_final_state','starting_time','total_execution_time',\
             'num_resubmits','real_finish_time','checkpointed','total_waiting_time','total_turnaround_time','total_dumps','work_progress',\
-            'checkpoint_time','dump_time','read_time','real_delay','MTBF','SMTBF','Tc_Error']
+            'checkpoint_time','dump_time','read_time','delay','real_delay','MTBF','SMTBF','Tc_Error']
 else:
     cols = ['job_id','workload_name','workload_num_machines','profile','submission_time','requested_number_of_resources'\
             ,'requested_time','success','real_final_state','starting_time','total_execution_time'\
             ,'real_finish_time','total_waiting_time','total_turnaround_time','delay','MTBF','SMTBF','Tc_Error']
 df3=df3[cols]
+if checkpointing:
+    df3.loc[~(df3['delay'] == df3['real_delay']),'checkpointing_on']=True
+    df3.loc[df3['delay']==df3['real_delay'],'checkpointing_on']=False
 
 avgAE = 0
 if checkpointing:
@@ -265,7 +269,9 @@ avg_tat = df3['total_turnaround_time'].mean()
 if makespan and checkpointing: 
     makespan = df3.real_finish_time.max() - df3.starting_time.min()
     checkpointed_num = len(df3.loc[df3.checkpointed == True])
+    checkpointing_on_num = len(df3.loc[df3.checkpointing_on == True])
     percent_checkpointed = float(checkpointed_num/float(len(df3)))
+    checkpointing_on_percent = float(checkpointing_on_num/float(len(df3)))
     outputMakespan = args["--input"].rstrip("/") + "/makespan.csv"
     from datetime import datetime, timedelta
     sec = timedelta(seconds=(int(makespan)))
@@ -273,6 +279,8 @@ if makespan and checkpointing:
     avg_tat_dhms =str(sec2)
     makespan_dhms = str(sec)
     numNodes = df3["workload_num_machines"].values[0]
+    utilization_df = df2.execution_time * df2.requested_number_of_resources
+    utilization = utilization_df.sum() / (makespan*numNodes)
     
     makespan_df = pd.DataFrame({"nodes":numNodes,
                                 "SMTBF":[SMTBF],
@@ -283,8 +291,11 @@ if makespan and checkpointing:
                                 "checkpointed_num":[checkpointed_num],
                                 "percent_checkpointed":[percent_checkpointed],
                                 "avg_tat":[avg_tat],
-                                "avg_tat_dhms":[avg_tat_dhms]
-                                
+                                "avg_tat_dhms":[avg_tat_dhms],
+                                "checkpointing_on_num":[checkpointing_on_num],
+                                "checkpointing_on_percent":[checkpointing_on_percent],
+                                "number_of_jobs":[len(df3)],
+                                "utilization":[utilization]
                                })
     makespan_df.to_csv(outputMakespan,mode='w',header=True)
 elif makespan:
@@ -297,6 +308,8 @@ elif makespan:
     avg_tat_dhms =str(sec2)
     makespan_dhms = str(sec)
     numNodes = df3["workload_num_machines"].values[0]
+    utilization_df = df2.execution_time * df2.requested_number_of_resources
+    utilization = utilization_df.sum() / (makespan*numNodes)
     
     makespan_df = pd.DataFrame({"nodes":numNodes,
                                 "SMTBF":[SMTBF],
@@ -305,7 +318,9 @@ elif makespan:
                                 "makespan_dhms":[makespan_dhms],
                                 "AAE":[avgAE],
                                 "avg_tat":[avg_tat],
-                                "avg_tat_dhms":[avg_tat_dhms]
+                                "avg_tat_dhms":[avg_tat_dhms],
+                                "number_of_jobs":[len(df3)],
+                                "utilization":[utilization]
                                 
                                })
     makespan_df.to_csv(outputMakespan,mode='w',header=True)

@@ -35,6 +35,10 @@ start an interactive shell:<br/>
     - Under `Required Options 1 -> --config-info <type>` you can see the various types of info that is offered
     - generate_config.py will not generate your config file for you.  It is called that because it takes a config file that you will need to write and generates the underlying config files the simulator needs.
 
-  ### For example:
-    #### Run a modified Figure 4, left-hand subfigure for workload 4:
-        
+### For example:
+  - Run a modified Figure 4, left-hand subfigure for workload 4:
+    - `file1=./configs/figure4_left_wl4.config`
+    - `folder1=/home/sim/experiments/fig4_left_wl4`
+    - `python3 run_simulation.py --config $file1 --output $folder1`
+    - `python3 aggregate_makespan.py -i $folder1`
+    - `python3 process_aggregation.py -i $folder1/total_makespan.csv`
