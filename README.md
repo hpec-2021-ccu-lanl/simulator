@@ -1,5 +1,5 @@
 # simulator
-The simulator is a modified Batsim simulator that is packaged into a docker, so one can easily build it and run some simulations
+Our work extends Batsim (https://batsim.readthedocs.io/) by applying patches to the original source. It has been packaged here to be applied and built in a dockerized format to ease of use and replication of our experimental data.  Those that wish to learn more about the native Batsim are encouraged to visit the Batsim homepage.
 
 ## How to build the docker
 clone this repo:<br/>
