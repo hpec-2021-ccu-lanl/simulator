@@ -12,6 +12,7 @@ Scripts are provided to apply patches to the original Batsim source and run expe
   - [Basic Steps](#basic_steps)
 - [Explanation Of total_makespan.csv](#total_makespan)
 - [Steps To Run](#steps_to_run)
+  - [How To Edit Config File](#edit_config)
   - [Example](#fig4_leftsub_wl4)
 
 ## <a name="build_docker"></a> How to build the docker
@@ -211,7 +212,7 @@ starting with "nodes"<br/>
 8.  Aggregate results if need be: `python3 aggregate_makespan.py -i ~/experiments/$folder1`
 9.  Process the results in ~/experiments/$folder1/total_makespan.csv
 
-\* Instructions for editing config files can be seen by running the following commands:
+<a name="edit_config"></a>\* Instructions for editing config files can be seen by running the following commands:
  - view general info on config files: `python3 generate_config.py  --config-info general`
  - view general info on sweeps: `python3 generate_config.py --config-info sweeps`
  - All --config-info options can be seen by running: `python3 generate_config.py --help`
