@@ -96,7 +96,7 @@ is only one value [1490].  There are tools available to do a real sweep, but we 
 - We use a formula for (**S**)ystem (**M**)ean (**T**)ime (**B**)etween (**F**)ailure.  
   - 128736000 * 1/i where "i" is replaced with a "range": [1,8]
   - So we will have 128736000 / **1** and 128736000 / **8**
-  - For clarification: 128,736,000 seconds = **24hrs/node** * **3600seconds/hr** * **1490nodes/system** * **1 system**
+  - For clarification: 128,736,000 node seconds = **24 system hrs** * **3600seconds/hr** * **1490 nodes/system**
     - so this is a system failure rate of 1 failure every 24 hours for baseline ( "range" : [1] ) and for 8x worse ( "range" : [8] )<br/><br/>
 - We let the simulator compute the optimal checkpointing for each job
 - We set the speed of the system to 1.0 (normal speed) where higher is slower ( a 30% faster and 30% slower system would be 0.70 and 1.30 respectively )
@@ -143,8 +143,8 @@ is only one value [1490].  There are tools available to do a real sweep, but we 
   you should get
   ```
 
-  4896980.836070  "56 days, 16:16:20"            <----fyi baseline makespan (displayed as seconds, then days,hh:mm:ss)
-  7861976.738434  "90 days, 23:52:56"            <----fyi 8x worse failures makespan (displayed as seconds, then days,hh:mm:ss)
+  4896980.836070  "56 days, 16:16:20"            <----baseline makespan (displayed as seconds, then days,hh:mm:ss)
+  7861976.738434  "90 days, 23:52:56"            <----8x worse failures makespan (displayed as seconds, then days,hh:mm:ss)
 
   ```
 
