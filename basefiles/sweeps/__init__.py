@@ -10,6 +10,7 @@ from sweeps.nodesweep import *
 from sweeps.SMTBFsweep import *
 from sweeps.checkpoint_sweep import *
 from sweeps.performance_sweep import *
+from sweeps.checkpointError_sweep import *
 
 
 def sweepSwitch(kindOfSweep):
@@ -17,7 +18,8 @@ def sweepSwitch(kindOfSweep):
         "node" : nodeSweep,
         "SMTBF" : SMTBFSweep,
         "checkpoint":checkpointSweep,
-        "performance":performanceSweep
+        "performance":performanceSweep,
+        "checkpointError":checkpointErrorSweep
     }
     return functions[kindOfSweep]
 

@@ -6,8 +6,8 @@ def checkpointSweep(checkpointSweepInput,ourInput):
     if type(myRange) == bool:
         minimum = checkpointSweepInput["min"]
         maximum = checkpointSweepInput["max"]
-        step = checkpointSweepInput["step"] if dictHasKey(nodeSweepInput,"step") else False
-        stepPercent = checkpointSweepInput["step-percent"] if dictHasKey(nodeSweepInput,"step-percent") else False
+        step = checkpointSweepInput["step"] if dictHasKey(checkpointSweepInput,"step") else False
+        stepPercent = checkpointSweepInput["step-percent"] if dictHasKey(checkpointSweepInput,"step-percent") else False
         if stepPercent:
             step = np.ceil(stepPercent * minimum).astype('int')
         if not step:

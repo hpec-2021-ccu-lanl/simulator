@@ -18,11 +18,13 @@ RUN \
     DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata && \
     apt-get install build-essential -y && \
     apt-get install cmake libboost-all-dev python3.6 git-all meson -y
-RUN \    
+RUN \  
+    apt-get update && \
     apt-get install libzmqpp-dev -y && \
     apt-get install libgmp-dev libzmq3-dev -y && \
     apt-get install libev-dev -y 
 RUN \
+    apt-get update && \
     apt-get install -y pkg-config
    
 COPY ./redox.pc /usr/lib64/pkgconfig/redox.pc
@@ -51,7 +53,6 @@ RUN \
 #install simgrid (current version 3.25)
 
 RUN \
-    
     cd /home/sim/Downloads/ && \
     git clone https://framagit.org/simgrid/simgrid.git && \
     cd /home/sim/Downloads/simgrid/ && \
@@ -151,7 +152,6 @@ USER sim
 COPY ./patch_batsim.patch /home/sim/Downloads/patch_batsim.patch
 COPY ./patch_batsched.patch /home/sim/Downloads/patch_batsched.patch
 RUN \
-    
     cd /home/sim/Downloads/ && \
     git clone https://github.com/oar-team/batsim.git && \
     cd /home/sim/Downloads/batsim && \
@@ -199,7 +199,7 @@ RUN \
     cd /home/sim/Downloads/batsched/ && \
     meson install -C build     
 USER root
-RUN  apt-get install golang -y
+RUN  apt-get update && apt-get install golang -y
 USER sim
 RUN \
     cd /home/sim/Downloads/ && \
@@ -207,7 +207,8 @@ RUN \
     go get framagit.org/batsim/batexpe/cmd/robintest
 
 USER root
-RUN \  
+RUN \
+    apt-get update && \
     apt-get install -y nano vim python3-pip  && \
     python3 -m pip install pandas numpy
 RUN \
@@ -215,7 +216,7 @@ RUN \
 USER sim
 RUN mkdir /home/sim/experiments
 USER root
-RUN apt-get install iproute2 -y
+RUN apt-get update && apt-get install iproute2 -y
 
 COPY ./.rootbashrc /root/.bashrc
 USER sim
