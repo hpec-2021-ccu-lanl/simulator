@@ -137,7 +137,7 @@ is only one value [1490].  There are tools available to do a real sweep, but we 
 5. Now to make determining whether we have correct results easier, run the following:<br />
   ```
   cat ~/experiments/$folder1/total_makespan.csv | \
-  awk -F, BEGIN'{printf "\n"}''(NR>1)''{printf "%f\t%s,%s\n",$6,$7,$8}'END'{printf "\n"}'
+  awk -F, BEGIN'{printf "\n"}''(NR>1)''{printf "%f\t%s,%s\n",$5,$7,$8}'END'{printf "\n"}'
   ```
 
   you should get
