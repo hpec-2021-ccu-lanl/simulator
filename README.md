@@ -212,7 +212,8 @@ starting with "nodes"<br/>
 8.  Aggregate results if need be: `python3 aggregate_makespan.py -i ~/experiments/$folder1`
 9.  Process the results in ~/experiments/$folder1/total_makespan.csv
 
-<a name="edit_config"></a>\* Instructions for editing config files can be seen by running the following commands:
+### <a name="edit_config"></a>How To Edit Config File
+\* Instructions for editing config files can be seen by running the following commands:
  - view general info on config files: `python3 generate_config.py  --config-info general`
  - view general info on sweeps: `python3 generate_config.py --config-info sweeps`
  - All --config-info options can be seen by running: `python3 generate_config.py --help`
