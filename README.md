@@ -208,7 +208,7 @@ starting with "nodes"<br/>
 5.  Set the config file you wish to run:`file1=./configs/figure4_left_wl4.config`
 6.  Set the output folder you wish the output to go to ( a **new** folder ): `folder1=NAME`
 7.  Run the simulation: `python3 run_simulation.py --config $file1 --output ~/experiments/$folder1`
-8.  Aggregate results if need be: `python3 aggregate_makespan.py` -i ~/experiments/$folder1
+8.  Aggregate results if need be: `python3 aggregate_makespan.py -i ~/experiments/$folder1`
 9.  Process the results in ~/experiments/$folder1/total_makespan.csv
 
 \* Instructions for editing config files can be seen by running the following commands:
