@@ -31,6 +31,16 @@ start an interactive shell:<br/>
 
 ## Test the batsim_docker
 
+Before we test our docker, please bear with us on some confusing terminology:
+
+This needs clarification. An "experiment", as far as the config file is concerned, is a json element that
+has an input and an output.  You can make multiple experiments in one config file.  Below, the "experiment" is "test" and all data for that experiment will be in the folder "test".<br/>
+
+ Each "job", as it relates to the config file, is one set of parameters used for a simulation.  For example, a simulation having a cluster with 1500 nodes vs a simulation having a cluster with 1600 nodes are two different "jobs".  Similarly two simulations both having 1500 nodes but differing on SMTBF are two different "jobs".  The confusion here is that "jobs" in this sense are titled "experiment_#" and so are their folder that comes under the "experiment" folder.<br />
+
+ "Runs" are simulations in the same "experiment" that have the exact same parameters and so come under the same "job" and are used for averaging purposes.  To further complicate things, there are the "simulated jobs".  These are part of the workloads that the simulator is running.<br />
+
+## Ok, that is out of the way
 Test the batsim_docker to see if it gives you the correct results.  This will make sure the docker is running properly, but will also give you a chance to see how the process
 of running simulations goes.  We will use a config file "test_docker.config".<br/>
 ```
@@ -94,10 +104,10 @@ is only one value [1490].  There are tools available to do a real sweep, but we 
 
 1. you should already be in the /home/sim/basefiles directory.   If not, head there. `cd /home/sim/basefiles`
 2. set two variables to make things easier:<br/>
-    ```file1=./configs/test_docker.config```
+    ```file1=./configs/test_docker.config```<br/>
     ```folder1=test_docker```
 3. Now we get our workloads made, input/output folders made for each run, underlying config files made, and then the simulations begin.
-    ```python3 run_simulation --config $file1 --output ~/experiments/$folder1```
+    ```python3 run_simulation.py --config $file1 --output ~/experiments/$folder1```
   - since the docker is not a cluster and simulations run sequentially, there is a handy counter that is flushed to output before every simulation.  For example:
 ```
     Experiment 1/1
@@ -122,12 +132,57 @@ is only one value [1490].  There are tools available to do a real sweep, but we 
   you should get
   ```
 
-  4896980.836070  "56 days, 16:16:20"            <----fyi baseline makespan (displayed as seconds, then days,h:m:s)
-  7861976.738434  "90 days, 23:52:56"            <----fyi 8x worse failures makespan (displayed as seconds, then days,h:m:s)
+  4896980.836070  "56 days, 16:16:20"            <----fyi baseline makespan (displayed as seconds, then days,hh:mm:ss)
+  7861976.738434  "90 days, 23:52:56"            <----fyi 8x worse failures makespan (displayed as seconds, then days,hh:mm:ss)
 
   ```
 
+If you wanted to know how much worse the makespan is for the worse failure rate, it's just a matter of taking the 8x worse makespan (use the seconds) and dividing by the baseline (use the seconds).
 
+### So that's basically it
+That is all that is needed to run simulations with the docker.  You basically edit the config file, set the file1/folder1, run "run_simulation.py", aggregate the results, and do something with the aggregation. <br />
+## total_makespan.csv clarification
+Let's make the total_makespan.csv clear.  I've put definitions for each field:
+```
+The first line is the header:
+,nodes,SMTBF,NMTBF,makespan_sec,avg_tat,makespan_dhms,avg_tat_dhms,AAE,checkpointed_num,percent_checkpointed,checkpointing_on_num,checkpointing_on_percent,job,exp
+```
+starting with "nodes"<br/>
+- **nodes**
+  - That's easy, just the amount of nodes the system had for that job
+- **SMTBF**
+  - System Mean Time Between Failure for that job
+- **NMTBF**
+  - Node Mean Time Between Failure for that job.  This is easier to look at and use for grouping as it doesn't matter how many nodes the system had for that job
+- **makespan_sec**
+  - makespan in seconds
+- **avg_tat**
+  - average Turn Around Time in seconds
+- **makespan_dhms**
+  - makespan in days, hours:minutes:seconds format.  Keep in mind that there is a comma in this representation
+    which may or may not mess things up for your comma separated values' file parsing
+- **avg_tat_dhms**
+  - similar to makespan_dhms, it is the Turn Around Time in days, hours:minutes:seconds format
+- **AAE**
+  - The Average-Average Application Efficiency of the job
+- **checkpointed_num**
+  - The average number of jobs that had to be restarted(maybe multiple times) and had checkpointed before failing(so they were able to be restarted by reading the checkpoint data)
+- **percent_checkpointed**
+  - Same as checkpointed_num except given as a percent
+- **checkpointing_on_num**
+  - If a global checkpointing interval is 4 hours but the individual job in the simulation was only 1 hour then no checkpointing time takes place.  Same situation can happen with "optimal" as it is dependent on dump time and not run time.  In this situation we call checkpointing "off" for that individual job.  This field is an average amount of jobs where the jobs were long enough to incorporate checkpointing and were so called "on".
+- **checkpointing_on_percent**
+  - same as checkpointing_on_num except given as a percent
+- **number_of_jobs**
+  - The amount of jobs in the workload for that experiment
+- **utilization**
+  - The average utilization of the simulated system over the simulation's makespan.
+- **job**
+  - This needs clarification. An "experiment", as far as the config file is concerned, is a json element that
+  has an input and an output.  You can make multiple experiments in one config file. Each "job", as it relates to the config file, is one set of parameters used for a simulation.  For example, a simulation using 1500 nodes vs a simulation using 1600 nodes are two different "jobs".  Similarly two simulations both having 1500 nodes but differing on SMTBF are two different "jobs".  The confusion here is that "jobs" in this sense are titled "experiment_#" and so are their folder that comes under the "experiment" folder. "Runs" are simulations in the same "experiment" that have the exact same parameters and so come under the same "job" and are used for averaging purposes.  To further complicate things, there are the "simulated jobs".  These are part of the workloads that the simulator is running.
+  This field "job" is how it relates to the config file and will be called "experiment_#"
+- **exp**
+  - This is the "experiment" that the job belongs to.  Read "job" above for clarification.
 
 
 
@@ -139,10 +194,12 @@ is only one value [1490].  There are tools available to do a real sweep, but we 
 1.  Start the docker container: `docker start batsim_docker`
 2.  Start an interactive shell: `docker exec -it batsim_docker /bin/bash`
 3.  Change directory to "basefiles": `cd /home/sim/basefiles`
-4.  Choose a config file and optionally edit it (*below): `nano ./configs/1_simulation.config`
-5.  Set the config file you wish to run:`file1=./configs/1_simulation.config`
-6.  Set the output folder you wish the output to go to ( a new folder ): `folder1=/home/sim/experiments/1_sim`
-5.  Run the simulation: `python3 run_simulation.py --config $file1 --output $folder1`
+4.  Choose a config file and optionally edit it (*below): `nano ./configs/figure4_left_wl4.config`
+5.  Set the config file you wish to run:`file1=./configs/figure4_left_wl4.config`
+6.  Set the output folder you wish the output to go to ( a **new** folder ): `folder1=/home/sim/experiments/NAME`
+7.  Run the simulation: `python3 run_simulation.py --config $file1 --output $folder1`
+8.  Aggregate results if need be: `python3 aggregate_makespan.py` -i $folder1
+9.  Process the results in $folder1/total_makespan.csv
 
 \* Instructions for editing config files can be seen by running the following commands:
  - view general info on config files: `python3 generate_config.py  --config-info general`
@@ -157,4 +214,4 @@ is only one value [1490].  There are tools available to do a real sweep, but we 
     - `folder1=/home/sim/experiments/fig4_left_wl4`
     - `python3 run_simulation.py --config $file1 --output $folder1`
     - `python3 aggregate_makespan.py -i $folder1`
-    - `python3 process_aggregation.py -i $folder1/total_makespan.csv`
+    - Now divide each makespan_sec in total_makespan.csv by the makespan_sec for the baseline (the first job, "experiment_1")

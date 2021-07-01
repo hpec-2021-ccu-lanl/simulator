@@ -127,7 +127,30 @@ with open(basePath+"/errors_total_makespan.txt","w") as OutFile:
             else:
                 makespanPath = path+"/"+exp+"/"+job + "/Run_1"   + "/output/expe-out/makespan.csv"
                 dfTmp = pd.read_csv(makespanPath,sep=",",header=0)
-                df = pd.concat([df,dfTmp],axis=0)
+                df2=pd.DataFrame()
+                df2["nodes"] = [dfTmp["nodes"].values[0]]
+                df2["SMTBF"] = [dfTmp["SMTBF"].values[0]]
+                df2["NMTBF"] = [dfTmp["NMTBF"].values[0]]
+                df2["makespan_sec"] = [dfTmp["makespan_sec"].mean()]
+                df2["avg_tat"] = [dfTmp["avg_tat"].mean()]
+                sec = timedelta(seconds=(int(df2["makespan_sec"].values[0])))
+                sec2= timedelta(seconds=(int(df2["avg_tat"].values[0])))
+                avg_tat_dhms = str(sec2)
+                makespan_dhms = str(sec)
+                df2["makespan_dhms"] = [makespan_dhms]
+                df2["avg_tat_dhms"] = [avg_tat_dhms]
+                df2["AAE"]=[dfTmp["AAE"].values[0]]
+                if "checkpointed_num" in dfTmp.columns:
+                    df2["checkpointed_num"] = [dfTmp["checkpointed_num"].values[0]]
+                    if "percent_checkpointed" in dfTmp.columns:
+                        df2["percent_checkpointed"] = [dfTmp["percent_checkpointed"].values[0]]
+                if "checkpointing_on_num" in dfTmp.columns:
+                    df2["checkpointing_on_num"] = [dfTmp["checkpointing_on_num"].values[0]]
+                    if "checkpointing_on_percent" in dfTmp.columns:
+                        df2["checkpointing_on_percent"] = [dfTmp["checkpointing_on_percent"].values[0]] 
+                df2["job"]=job
+                df2["exp"]=exp
+                df = pd.concat([df,df2],axis=0)
             jobNeCount[str(exp)+"  "+str(job)]=neCountJob
             jobECount[str(exp)+"  "+str(job)]=eCountJob
             neCountJob=0
