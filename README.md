@@ -8,7 +8,7 @@ Scripts are provided to apply patches to the original Batsim source and run expe
 - [Run The Docker](#run_docker)
 - [Test The Docker](#test_docker)
   - [Config File](#config)
-    - [Intro To Config]("#intro_to_config")
+    - [Intro To Config](#intro_to_config)
   - [Run Test](#run_test)
   - [Basic Steps](#basic_steps)
 - [Explanation Of total_makespan.csv](#total_makespan)
