@@ -1,12 +1,7 @@
 # simulator
+Our work makes use of Inria's Batsim (https://batsim.readthedocs.io/) simulator. We have added a node fault model and simulated job checkpoint / restart in order to more easily explore the trade-offs between performance and reliability. This repo is associated with our IEEE HPEC 2021 submitted article entitled "Exploring the Tradeoff Between Reliability and Performance in HPC Systems." <br/>
 
-The simulator is a modified Batsim simulator that is packaged into a docker, so one can easily build it and run some simulations.<br/>
-The modifications include:
-  - checkpointing
-  - system failures/job restart
-  - modified output
-  - a framework for starting parameter sweeps as well as post-processing
-
+Scripts are provided to apply patches to the original Batsim source and run experiments congruent with those presented in our article. They have been packaged here to be applied, built, and executed in a dockerized format for ease of use and replication of our experimental data presented in the HPEC article.  Those that wish to learn more about the native Batsim are encouraged to visit the Batsim homepage directly.
 
 
 
