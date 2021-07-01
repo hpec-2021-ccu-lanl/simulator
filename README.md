@@ -8,10 +8,11 @@ Scripts are provided to apply patches to the original Batsim source and run expe
 - [Run The Docker](#run_docker)
 - [Test The Docker](#test_docker)
   - [Config File](#config)
+    - [Intro To Config]("#intro_to_config")
   - [Run Test](#run_test)
   - [Basic Steps](#basic_steps)
 - [Explanation Of total_makespan.csv](#total_makespan)
-- [Steps To Run](#steps_to_run)
+- [Steps To Run Simulations](#steps_to_run)
   - [How To Edit Config File](#edit_config)
   - [Example](#fig4_leftsub_wl4)
 
@@ -89,7 +90,7 @@ of running simulations goes.  We will use a config file "test_docker.config".<br
 }
 ```
 
-### <a name="intro_to_conig"></a>Just a real quick intro to this config file...
+### <a name="intro_to_config"></a>Just a real quick intro to this config file...
 - We are sweeping over nodes, but really there is no sweep, as we used a fixed "range" and in that list of nodes there
 is only one value [1490].  There are tools available to do a real sweep, but we won't get into that just yet.<br/><br/>
 - We use a formula for (**S**)ystem (**M**)ean (**T**)ime (**B**)etween (**F**)ailure.  
