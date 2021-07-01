@@ -3,9 +3,18 @@ Our work makes use of Inria's Batsim (https://batsim.readthedocs.io/) simulator.
 
 Scripts are provided to apply patches to the original Batsim source and run experiments congruent with those presented in our article. They have been packaged here to be applied, built, and executed in a dockerized format for ease of use and replication of our experimental data presented in the HPEC article.  Those that wish to learn more about the native Batsim are encouraged to visit the Batsim homepage directly.
 
+## Table of Contents
+- [Build Docker](#build_docker)
+- [Run The Docker](#run_docker)
+- [Test The Docker](#test_docker)
+  - [Config File](#config)
+  - [Run Test](#run_test)
+  - [Basic Steps](#basic_steps)
+- [Explanation Of total_makespan.csv](#total_makespan)
+- [Steps To Run](#steps_to_run)
+  - [Example](#fig4_leftsub_wl4)
 
-
-## How to build the docker
+## <a name="build_docker"></a> How to build the docker
 
 clone this repo:<br/>
 ```git clone https://github.com/hpec-2021-ccu-lanl/simulator.git``` <br/>
@@ -17,7 +26,7 @@ build the docker and name the image "simulator": <br/>
 
 
 
-## How to run the docker
+## <a name="run_docker"></a>How to run the docker
 
 create the docker container based off the "simulator" image and name it "batsim_docker":<br/>
 ```docker create --name batsim_docker -t simulator```<br/>
@@ -29,7 +38,7 @@ start an interactive shell:<br/>
 
 
 
-## Test the batsim_docker
+## <a name="test_docker"></a>Test the batsim_docker
 
 Before we test our docker, please bear with us on some confusing terminology:
 
@@ -40,7 +49,7 @@ has an input and an output.  You can make multiple experiments in one config fil
 
  "Runs" are simulations in the same "experiment" that have the exact same parameters and so come under the same "job" and are used for averaging purposes.  To further complicate things, there are the "simulated jobs".  These are part of the workloads that the simulator is running.<br />
 
-## Ok, that is out of the way
+## <a name="config"></a>Ok, that is out of the way
 Test the batsim_docker to see if it gives you the correct results.  This will make sure the docker is running properly, but will also give you a chance to see how the process
 of running simulations goes.  We will use a config file "test_docker.config".<br/>
 ```
@@ -79,7 +88,7 @@ of running simulations goes.  We will use a config file "test_docker.config".<br
 }
 ```
 
-### Just a real quick intro to this config file...
+### <a name="intro_to_conig"></a>Just a real quick intro to this config file...
 - We are sweeping over nodes, but really there is no sweep, as we used a fixed "range" and in that list of nodes there
 is only one value [1490].  There are tools available to do a real sweep, but we won't get into that just yet.<br/><br/>
 - We use a formula for (**S**)ystem (**M**)ean (**T**)ime (**B**)etween (**F**)ailure.  
@@ -100,7 +109,7 @@ is only one value [1490].  There are tools available to do a real sweep, but we 
 
 
 
-### Ok, let's run this test
+### <a name="run_test"></a>Ok, let's run this test
 
 1. you should already be in the /home/sim/basefiles directory.   If not, head there. `cd /home/sim/basefiles`
 2. set two variables to make things easier:<br/>
@@ -139,9 +148,10 @@ is only one value [1490].  There are tools available to do a real sweep, but we 
 
 If you wanted to know how much worse the makespan is for the worse failure rate, it's just a matter of taking the 8x worse makespan (use the seconds) and dividing by the baseline (use the seconds).
 
-### So that's basically it
+### <a name="basic_steps"></a>So that's basically it
 That is all that is needed to run simulations with the docker.  You basically edit the config file, set the file1/folder1, run "run_simulation.py", aggregate the results, and do something with the aggregation. <br />
-## total_makespan.csv clarification
+
+## <a name="total_makespan"></a>total_makespan.csv clarification
 Let's make the total_makespan.csv clear.  I've put definitions for each field:
 ```
 The first line is the header:
@@ -189,17 +199,17 @@ starting with "nodes"<br/>
 
 
 
-## How to run some simulations
+## <a name="steps_to_run"></a>How to run some simulations
 
 1.  Start the docker container: `docker start batsim_docker`
 2.  Start an interactive shell: `docker exec -it batsim_docker /bin/bash`
 3.  Change directory to "basefiles": `cd /home/sim/basefiles`
 4.  Choose a config file and optionally edit it (*below): `nano ./configs/figure4_left_wl4.config`
 5.  Set the config file you wish to run:`file1=./configs/figure4_left_wl4.config`
-6.  Set the output folder you wish the output to go to ( a **new** folder ): `folder1=/home/sim/experiments/NAME`
-7.  Run the simulation: `python3 run_simulation.py --config $file1 --output $folder1`
-8.  Aggregate results if need be: `python3 aggregate_makespan.py` -i $folder1
-9.  Process the results in $folder1/total_makespan.csv
+6.  Set the output folder you wish the output to go to ( a **new** folder ): `folder1=NAME`
+7.  Run the simulation: `python3 run_simulation.py --config $file1 --output ~/experiments/$folder1`
+8.  Aggregate results if need be: `python3 aggregate_makespan.py` -i ~/experiments/$folder1
+9.  Process the results in ~/experiments/$folder1/total_makespan.csv
 
 \* Instructions for editing config files can be seen by running the following commands:
  - view general info on config files: `python3 generate_config.py  --config-info general`
@@ -208,10 +218,24 @@ starting with "nodes"<br/>
     - Under `Required Options 1 -> --config-info <type>` you can see the various types of info that is offered
     - generate_config.py will not generate your config file for you.  It is called that because it takes a config file that you will need to write and generates the underlying config files the simulator needs.
 
-### For example:
+### <a name="fig4_leftsub_wl4"></a>For example:
   - Run a modified Figure 4, left-hand subfigure for workload 4:
     - `file1=./configs/figure4_left_wl4.config`
-    - `folder1=/home/sim/experiments/fig4_left_wl4`
-    - `python3 run_simulation.py --config $file1 --output $folder1`
-    - `python3 aggregate_makespan.py -i $folder1`
+    - `folder1=fig4_left_wl4`
+    - `python3 run_simulation.py --config $file1 --output ~/experiments/$folder1`
+      - This command took about 1.5 hours on my computer
+    - `python3 aggregate_makespan.py -i ~/experiments/$folder1`
     - Now divide each makespan_sec in total_makespan.csv by the makespan_sec for the baseline (the first job, "experiment_1")
+      You should get roughly what is in Figure 4, left-hand subfigure for workload 4. Keep in mind, this is only 10 runs.  The paper used 1500 runs.
+      - The following will do these calculations for you:
+        ```
+        baseline=`cat ~/experiments/$folder1/total_makespan.csv | awk -F, '(NR>1)''{print $5}' | awk '(NR==1)''{print}'` && cat ~/experiments/$folder1/total_makespan.csv | awk -F, '(NR>2)''{print $5}' | awk -v baseline=$baseline BEGIN'{i=1}''{ printf "%f\tworse failures:%dx\n", $1/baseline,2^i;i=i+1}'
+        ```
+        This is what I get running these commands:
+        ```
+        1.015441        worse failures:2x
+        1.049923        worse failures:4x
+        1.100013        worse failures:8x
+        1.188432        worse failures:16x
+        1.328728        worse failures:32x
+        ```
