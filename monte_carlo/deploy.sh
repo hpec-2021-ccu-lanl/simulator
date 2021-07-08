@@ -193,10 +193,10 @@ cd /home/$USER/Downloads/ && \
 git clone https://github.com/oar-team/batsim.git && \
 cd /home/$USER/Downloads/batsim && \
 git checkout tags/v3.1.0 -b my_batsim && \
-patch -p8 -i /home/sim/Downloads/patch_batsim.patch
+patch -p8 -i /home/$USER/Downloads/patch_batsim.patch && \
 cd /home/$USER/Downloads/batsim && \
 meson build --prefix=/home/$USER/Install --buildtype release && \
-ninja -C build && \
+ninja -j 2 -C build && \
 meson install -C build && \
 cd /home/$USER/Downloads/ && \
 git clone https://github.com/emilk/loguru.git && \
@@ -206,10 +206,12 @@ cp /home/$USER/Downloads/loguru/libloguru.so /home/$USER/Install/lib/ && \
 cp /home/$USER/Downloads/loguru/loguru.hpp /home/$USER/Install/include/ && \
 export BOOST_ROOT=/home/$USER/Install && \
 cd /home/$USER/Downloads/ && \
-git clone https://gitlab+deploy-token-2:MsUCHwQNhrsQakyHy_GC@gitlab.newmexicoconsortium.org/lanl-ccu/batsched.git && \
+git clone https://github.com/oar-team/batsched.git && \
 cd /home/$USER/Downloads/batsched && \
+git checkout tags/v1.3.0 -b my_batsched && \
+patch -p8 -i /home/$USER/Downloads/patch_batsched.patch 
 meson build --prefix=/home/$USER/Install --buildtype release && \
-ninja -C build && \
+ninja -j 2 -C build && \
 meson install -C build && \
 cd /home/$USER/Downloads/ && \
 go get framagit.org/batsim/batexpe/cmd/robin && \

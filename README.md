@@ -267,7 +267,7 @@ For this reason, you may want to consider a cluster for your tests.  Our cluster
       - [Aggregate Results](#aggregate_ac)
       - [Analyze](#analyze_ac)
   - [How To Change Config Files](#change_config_ac)
-  
+
 ## <a name="how_to_run"></a> How To Run Monte Carlo Simulations
 
 ### <a name="prepare"></a> Prepare
@@ -281,6 +281,9 @@ Change Directory to user directory<br/>
 `cd /home/$USER`<br/>
 Copy deploy.sh into user directory<br/>
 `cp ./monte_carlo/deploy.sh /home/$USER/deploy.sh`<br/>
+Copy patches of batsim and batsched to Downloads<br/>
+`cp ./monte_carlo/patch_batsim.patch ~/Downloads/patch_batsim.patch`<br/>
+`cp ./monte_carlo/patch_batsched.patch ~/Downloads/patch_batsched.patch`<br/>
 Run deploy.sh . Again, this will need to be edited first<br/>
 `./deploy.sh`<br/>
 
@@ -352,7 +355,7 @@ sbatch -p usrc-nd02 -N1 -n1 -c1 --output=./myBatch.log \
     - dividing can be done with an `awk` command
       - First get the baseline by replacing **NR==1** by **NR==#** where **#** equals the line that is the baseline<br/>
         ```baseline=`cat ~/experiments/$folder1/total_makespan.csv | awk -F, '(NR==1)''{print $5}'` ```<br/>
-        Next do the division. Replace **NR==2** with **NR==#** where **#** equals the line that you are dividing by the baseline:<br/>
+      - Next do the division. Replace **NR==2** with **NR==#** where **#** equals the line that you are dividing by the baseline:<br/>
         ```
         cat ~/experiments/$folder1/total_makespan.csv | awk -F, -v baseline=$baseline '(NR==2)''{printf "%f",$5/baseline}'
         ```
