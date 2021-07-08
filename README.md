@@ -253,96 +253,117 @@ of about 1 every 10 minutes.  In order to sweep the 1,2,4,8,16,32 SMTBF it would
 8 or 10 hours for all 6 workloads for 13 day baseline, and longer but around the same for the 24 hour. (more errors equates to longer simulation time).<br/>
 
 For this reason, you may want to consider a cluster for your tests.  Our cluster uses SLURM and we leverage it for parallelization.  These steps and instructions need to be understood so that you can adapt them to your linux distro and cluster situation.
+
 ## Table Of Contents
 - [How To Run Monte Carlo Simulations](#how_to_run)
   - [Prepare](#prepare)
   - [Install](#install)
+  - [How To Run A Simulation On Our AC-Cluster](#how_to_run_ac)
+    - [Run Simulation (generic)](#run_sim)
+    - [Actual Test Simulation (3 runs)](#run_3sim)
+    - [Actual Simulation (1500 runs)](#run_1500sim)
+      - [myBatch Running?](#myBatch)
+      - [Completed?](#completed)
+      - [Aggregate Results](#aggregate_ac)
+      - [Analyze](#analyze_ac)
+  - [How To Change Config Files](#change_config_ac)
+  
 ## <a name="how_to_run"></a> How To Run Monte Carlo Simulations
 
 ### <a name="prepare"></a> Prepare
 
-If you haven't yet, look over the file monte_carlo -> README_FILES.txt to see what each file does.
-In particular, look over deploy.sh and generate_config.py
-
-
+If you haven't yet, read over **simulator / monte_carlo / README_FILES.txt** to see what each file does.<br />
+In particular, look over **deploy.sh** and **generate_config.py**<br/>
+You will undoubtedly need to edit **deploy.sh** for your needs.
 ### <a name="install"></a> Install
 
-- `cd /home/$USER`
-- `cp ./monte_carlo/deploy.sh /home/$USER/deploy.sh`
-- `./deploy.sh`
-
+Change Directory to user directory<br/>
+`cd /home/$USER`<br/>
+Copy deploy.sh into user directory<br/>
+`cp ./monte_carlo/deploy.sh /home/$USER/deploy.sh`<br/>
+Run deploy.sh . Again, this will need to be edited first<br/>
+`./deploy.sh`<br/>
 
 - gcc: 10.2.0
 - Kernel: 3.10.0-1160.6.1.el7.x86_64
 - python: 3.6.8
 
+### <a name="how_to_run_ac"></a> How to Run A Simulation On Our AC-Cluster
+Change Directory to **simulator / monte_carlo** <br/>
+`cd monte_carlo` <br/>
+if you don't have an experiments folder already <br/>
+`mkdir ~/experiments` <br/>
+<a name="run_sim"></a> <h4>Generic Example:</h4>
+
+`file1=./configs/configFileName.config` <br/>
+Make sure the folder name is different each time <br/>
+`folder1=~/experiments/configFileName` <br/>
+``` base=`pwd` ```<br/>
+```
+sbatch -p usrc-nd02 -N1 -n1 -c1 --output=./myBatch.log \
+--export=folder1=$folder1,file1=$file1,basefiles=$base \
+ ./myBatch
+```
+<a name="run_3sim"></a> <h4>Actual Test Simulation (3 Runs of each simulation)</h4>
+
+`file1=./configs/MC_test.config`<br/>
+`folder1=~/experiments/MC_test`<br/>
+``` base=`pwd` ```<br/>
+Run this once.  It changes a path that is needed for the simulation workload:<br/>
+`sed -i "s:TODO:$base/:g" ./configs/MC_test.config`<br/>
+```
+sbatch -p usrc-nd02 -N1 -n1 -c1 --output=./myBatch.log \
+--export=folder1=$folder1,file1=$file1,basefiles=$base \
+ ./myBatch
+```
+<a name="run_1500sim"></a> <h4>Actual Simulation (1500 Runs of each simulation)</h4>
+
+`file1=./configs/MC.config`<br/>
+`folder1=~/experiments/MC`<br/>
+``` base=`pwd` ```<br/>
+Run this once.  It changes a path that is needed for the simulation workload:<br/>
+`sed -i "s:TODO:$base/:g" ./configs/MC.config`<br/>
+```
+sbatch -p usrc-nd02 -N1 -n1 -c1 --output=./myBatch.log \
+--export=folder1=$folder1,file1=$file1,basefiles=$base \
+ ./myBatch
+```
 
 
 
+<a name="myBatch"></a>**Make sure myBatch is running (ie there were no json problems in the config file )**<br/>
+`squeue --format="%.18i %.9P %.8j %.8u %.8T %.10M %.9l %.6D %R %.120k"`<br/>
 
-HOW TO RUN MONTE CARLO SIMULATION ON AC-CLUSTER
-------------------------------------------------
-cd monte_carlo
-#if you don't have an experiments folder already
-mkdir ../experiments
-base=`pwd`
+<a name="completed"></a>**Continue to squeue to check if jobs are completing and to tell when they have all been completed**<br/>
+`squeue --format="%.18i %.9P %.8j %.8u %.8T %.10M %.9l %.6D %R %.120k" | tail -n 10`<br/>
 
-#Example:
-file1=./configs/configFileName.config
-folder1=../experiments/configFileName
+<a name="aggregate_ac"></a>**Aggregate Results**<br/>
+`python3 aggregate_makespan.py -i $folder1`<br/>
 
+<a name="analyze_ac"></a>**Analyze ../experiments/$folder1/total_makespan.csv**<br/>
 
-m#Actual for test (3 Runs of each simulation)
-file1=./configs/MC_test.config
-folder1=../experiments/MC_test
-
-#Actual for the real thing
-file1=./configs/MC.config
-folder1=../experiments/MC
-
-#THIS NEXT MANUAL SECTION CAN BE AUTOMATED WITH: [note: make sure you use double quotes or $base will not be substituted with it's value]
-sed -i "s:TODO:$base/:g" ./configs/MC_test.config
-sed -i "s:TODO:$base/:g" ./configs/MC.config
-
-
-MANUAL: edit ./configs/MC.config
-        for each "synthetic-workload", change "number-of-resources"
-        and "duration-time" to have a path to wl[1-6].csv
-        currently it is set for a made up path TODO/    TODO/wl[1-6].csv
+  - group by "exp" : so you will have wl[1-6]_24hr and wl[1-6]_13d
+    - group by "job" in each "exp" grouping
+      - The job "experiment_1" will be the baseline
+      - The job "experiment_2" will be the 2x
+      - The job "experiment_3" will be the 5x
+    - divide every "experiment_2"'s "makespan_sec" by "experiment_1"'s "makespan_sec"
+    - divide every "experiment_3"'s "makespan_sec" by "experiment_1"'s "makespan_sec"
+    - dividing can be done with an `awk` command
+      - First get the baseline by replacing **NR==1** by **NR==#** where **#** equals the line that is the baseline<br/>
+        ```baseline=`cat ~/experiments/$folder1/total_makespan.csv | awk -F, '(NR==1)''{print $5}'` ```<br/>
+        Next do the division. Replace **NR==2** with **NR==#** where **#** equals the line that you are dividing by the baseline:<br/>
+        ```
+        cat ~/experiments/$folder1/total_makespan.csv | awk -F, -v baseline=$baseline '(NR==2)''{printf "%f",$5/baseline}'
+        ```
 
 
+### <a name="change_config_ac"></a> INFO ON HOW TO CHANGE CONFIG FILES
 
-
-
-
-sbatch -p usrc-nd02 -N1 -n1 -c1 --output=./myBatch.log --export=folder1=$folder1,file1=$file1,basefiles=$base ./myBatch
-
-#make sure myBatch is running (ie there were no json problems in the config file )
-squeue --format="%.18i %.9P %.8j %.8u %.8T %.10M %.9l %.6D %R %.120k"
-
-#continue to squeue to check if jobs are completing and to tell when they have all been completed
-squeue --format="%.18i %.9P %.8j %.8u %.8T %.10M %.9l %.6D %R %.120k" | tail -n 10
-
-python3 aggregate_makespan.py -i $folder1
-
-MANUAL:
-
-analyze ../experiments/$folder1/total_makespan.csv
-    * group by "exp" : so you will have wl[1-6]_24hr and wl[1-6]_13d
-      * group by "job" in each "exp" grouping
-            The job "experiment_1" will be the baseline
-            The job "experiment_2" will be the 2x
-            The job "experiment_3" will be the 5x
-        * divide every "experiment_2"'s "makespan_sec" by "experiment_1"'s "makespan_sec"
-        * divide every "experiment_3"'s "makespan_sec" by "experiment_1"'s "makespan_sec"
-
-
-
-
-INFO ON HOW TO CHANGE CONFIG FILES
-------------------------------------
-
+This is covered in the docker sections, but here it is again:<br/>
+```
 python3 generate_config.py --config-info [ general | sweeps |
-                                           node-sweep | SMTBF-sweep | checkpoint-sweep | checkpointError-sweep | performance-sweep |
-                                           grizzly-workload | synthetic-workload |
-                                           input-options | output ]
+                                            node-sweep | SMTBF-sweep | checkpoint-sweep | checkpointError-sweep | performance-sweep |
+                                            grizzly-workload | synthetic-workload |
+                                            input-options | output ]
+```
